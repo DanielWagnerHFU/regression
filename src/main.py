@@ -12,13 +12,21 @@ def main():
         popt, pcov = curve_fit(func, x, y)
         return popt
 
+    def shift_min_to_origin(x, y):
+        min_y_index = y.argmin()
+        x_min = x[min_y_index]
+        y_min = y[min_y_index]
+        x_shifted = x - x_min
+        y_shifted = y - y_min
+        return x_shifted, y_shifted
+
     data = DataHandler.load_data_from_excel("./doc/Asphaere_Rohdaten_Only-0-Grad.xlsx")
     x = data[:, 0]
     y = data[:, 1]
-
-    r, a, b, c, d, e, f = optimize_params(x, y)
-    x = np.linspace(-10, 10, 1000)
-    y = func(x, r, a, b, c, d, e, f)
+    x, y = shift_min_to_origin(x, y)
+    #r, a, b, c, d, e, f = optimize_params(x, y)
+    #x = np.linspace(-10, 10, 1000)
+    #y = func(x, r, a, b, c, d, e, f)
 
     plt.plot(x, y, 'o-')
     plt.xlabel('x')
