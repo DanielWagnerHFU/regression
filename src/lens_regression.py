@@ -21,6 +21,16 @@ class LensRegression:
     def model_function(self, x, r, a4, a6, a8, a10, a12, a14):
         return r + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
 
+    def set_final(self):
+        def fun(x, r, a4, a6, a8, a10, a12, a14):
+            return (x**2 / (r * (1 + np.sqrt(1 - (x**2 / r**2))))) + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
+        parameters = [200000000, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14]
+        x = self.points[:, 0]
+        print(x.min())
+        print(x.max())
+        self.predicted_y = fun(x, *parameters)
+
+
     def do_regression(self):
         x = self.points[:, 0]
         y = self.points[:, 1]

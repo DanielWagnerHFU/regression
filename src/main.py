@@ -5,6 +5,7 @@ def main():
     lens_regression.rotate_points(180)
     lens_regression.shift_min_to_origin()
     lens_regression.do_regression()
+    lens_regression.set_final()
     lens_regression.render()
 
 if __name__ == "__main__":
