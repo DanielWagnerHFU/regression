@@ -8,30 +8,21 @@ class LensRegression:
     def __init__(self, data_path):
         self.points = DataHandler.load_data_from_excel(data_path)
         assert (len(self.points.shape) == 2 and self.points.shape[1] == 2)
-        self.r = 2.0
-        self.a4 = 2.0
-        self.a6 = 2.0
-        self.a8 = 2.0
-        self.a10 = 2.0
-        self.a12 = 2.0
-        self.a14 = 2.0
+        self.r = 1.0
+        self.a4 = 1.0
+        self.a6 = 1.0
+        self.a8 = 1.0
+        self.a10 = 1.0
+        self.a12 = 1.0
+        self.a14 = 1.0
         self.r_squared = None
         self.predicted_y = None
 
     def model_function(self, x, r, a4, a6, a8, a10, a12, a14):
-        return r + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
-
-    def set_final(self):
-        def fun(x, r, a4, a6, a8, a10, a12, a14):
-            return (x**2 / (r * (1 + np.sqrt(1 - (x**2 / r**2))))) + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
-        parameters = [200000000, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14]
-        x = self.points[:, 0]
-        print(x.min())
-        print(x.max())
-        self.predicted_y = fun(x, *parameters)
-
+        return (x**2 / (r * (1 + np.sqrt(1 - (x**2 / r**2))))) + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
 
     def do_regression(self):
+        self.r = max([abs(np.min(self.points[:, 0])), abs(np.max(self.points[:, 0]))]) + 100
         x = self.points[:, 0]
         y = self.points[:, 1]
         parameters = [self.r, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14]
@@ -66,7 +57,13 @@ class LensRegression:
     def render(self):
         print(self.r_squared)
         fig, ax = plt.subplots()
-        ax.scatter(self.points[:, 0], self.points[:, 1], color='red')
-        ax.scatter(self.points[:, 0], self.predicted_y, color='blue')
+        ax.scatter(self.points[:, 0], self.points[:, 1], color='red', s=1)
+        ax.scatter(self.points[:, 0], self.predicted_y, color='blue', s=1)
+        y_difference = abs(self.points[:, 1] - self.predicted_y)
+        max_y = max([np.max(self.predicted_y), np.max(self.points[:, 1])])
+        max_y_dif = np.max(y_difference)
+        factor = max_y / max_y_dif
+        y_difference = y_difference * (factor / 1.5)
+        ax.scatter(self.points[:, 0], y_difference, color='green', s=1)
         plt.show()
 
