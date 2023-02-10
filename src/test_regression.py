@@ -1,11 +1,6 @@
 from math import sqrt
 import numpy as np
 
-def f(x, a0, a1):
-    T1 = 1-sqrt(1-x**2)
-    T2 = a0*x**2 + a1*x**4
-    return T1 + T2
-
 def create_design_matrix(points, degrees):
     m = len(points)
     n = len(degrees)

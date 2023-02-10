@@ -1,3 +1,4 @@
+from math import sqrt
 import numpy as np
 from data_handler import DataHandler
 from scipy.optimize import curve_fit
@@ -21,8 +22,9 @@ class LensRegression:
     def model_function(self, x, r, a4, a6, a8, a10, a12, a14):
         return (x**2 / (r * (1 + np.sqrt(1 - (x**2 / r**2))))) + a4*x**4 + a6*x**6 + a8*x**8 + a10*x**10 + a12*x**12 + a14*x**14
 
-    def do_regression(self):
-        self.r = max([abs(np.min(self.points[:, 0])), abs(np.max(self.points[:, 0]))]) + 100
+    def do_iterative_regression(self, set_r = True):
+        if (set_r):
+            self.r = max([abs(np.min(self.points[:, 0])), abs(np.max(self.points[:, 0]))]) + 100
         x = self.points[:, 0]
         y = self.points[:, 1]
         parameters = [self.r, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14]
@@ -30,6 +32,34 @@ class LensRegression:
         self.predicted_y = self.model_function(x, *popt)
         self.r, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14 = popt
         self.calculate_r_squared()
+
+    def do_analytical_regression(self, set_r = True):
+        def create_design_matrix(points, degrees):
+            m = len(points)
+            n = len(degrees)
+            X = np.zeros((m, n))
+            for i, point in enumerate(points):
+                x, y = point
+                for j, degree in enumerate(degrees):
+                    X[i, j] = x**degree
+            return X
+
+        def nonlinearPart(x_i):
+            return (x_i**2 / (self.r * (1 + sqrt(1 - (x_i**2 / self.r**2)))))
+
+        if (set_r):
+            self.r = 9693416815.0
+        x = self.points[:, 0]
+        y = self.points[:, 1]
+        points = [(x, y) for x, y in zip(x, y)]
+        degrees = [4, 6, 8, 10, 12, 14]
+        X = create_design_matrix(points, degrees)
+        Y = np.array([(y - nonlinearPart(x)) for x, y in points])
+        a = np.linalg.inv(X.T @ X) @ X.T @ Y
+        self.r, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14 = self.r, a[0], a[1], a[2], a[3], a[4], a[5]
+        self.predicted_y = self.model_function(x, self.r, self.a4, self.a6, self.a8, self.a10, self.a12, self.a14)
+        self.calculate_r_squared()
+
 
     def calculate_r_squared(self):
         x = self.points[:, 0]
