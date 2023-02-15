@@ -69,7 +69,7 @@ class LensRegression:
         residuals = y - self.predicted_y
         ss_res = np.sum(residuals**2)
         ss_tot = np.sum((y-np.mean(y))**2)
-        self.r_squared = 1 - (ss_res / ss_tot) #Unbestimmtheitsmaß
+        self.r_squared = ss_res / ss_tot
 
     def shift_min_to_origin(self):
         x = self.points[:, 0]
